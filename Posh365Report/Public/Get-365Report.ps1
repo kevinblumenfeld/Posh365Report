@@ -1,5 +1,5 @@
 function Get-365Report {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='NoFilter')]
     Param (
 
         [Parameter(Mandatory = $True)]
@@ -11,17 +11,17 @@ function Get-365Report {
         [Parameter(Mandatory = $True)]
         [string] $Secret,
     
-        [Parameter(Mandatory = $False)]
+        [Parameter()]
         [string] $ReportURL,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(ParameterSetName='Filter')]
         [ValidateSet(7, 30, 90, 180)]
         [int] $NumberofDays,
 
-        [Parameter()]
+        [Parameter(ParameterSetName='Filter')]
         [string] $FilterByAttribute,
 
-        [Parameter()]
+        [Parameter(ParameterSetName='Filter')]
         [string] $Filter
     )
     Begin {
@@ -41,7 +41,7 @@ function Get-365Report {
 
             ((Invoke-RestMethod -Headers @{
                         Authorization = ("Bearer " + $token)
-                    } -Uri "https://graph.microsoft.com/beta/reports/getEmailActivityUserDetail(period='D7')?`$format=application/json" -Method Get).value).where( {
+                    } -Uri ("https://graph.microsoft.com/beta/reports/getEmailActivityUserDetail(period='D" + $NumberofDays + "')?`$format=application/json") -Method Get).value).where( {
                     $_.userprincipalname -in $Compare
                 })
         }
